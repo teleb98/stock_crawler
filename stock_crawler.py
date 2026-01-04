@@ -4,6 +4,7 @@ import pandas as pd
 from io import StringIO
 import time
 from datetime import datetime
+
 import os
 
 def get_encparam(code, session):
@@ -106,7 +107,10 @@ def process_data(df, code, name):
     result_df = pd.DataFrame(extracted)
     result_df = result_df.apply(pd.to_numeric, errors='coerce')
     
-    result_df['주가'] = result_df['EPS'] * result_df['PER']
+    # Calculate derived fields: Stock Price, Market Cap
+    # User requested BPS based calculation (Price = BPS * PBR)
+    # This is often more stable than PER which can be NaN for loss-making companies
+    result_df['주가'] = result_df['BPS'] * result_df['PBR']
     result_df['참고_시가총액(억원)'] = (result_df['주가'] * result_df['발행주식수']) / 100000000 # Convert to Eok Won for readability
     
     result_df.reset_index(inplace=True)
